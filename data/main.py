@@ -54,32 +54,38 @@ CREATE TABLE IF NOT EXISTS AZ(a1 VARCHAR, a2 integer, a3 integer )
         )    
         
 
-    def add_where_clause(self, command:str, a1:str=None, a2:int=None, a3:int=None):
-        command += " WHERE "
+    def add_where_clause(self, *args, **kwargs):
+        return self.add_for_params_clause(*args, **kwargs)       
+                 
+    def add_for_params_clause(self, command:str,
+                        a1:str=None, a2:int=None, a3:int=None, 
+                        alter:str|None = " WHERE ", alter_and:str|None = " AND "
+                        ):
+                        
+        command += alter
         params = []
         
         if a1 is not None:
-            command += "a1=?"
+            command += "a1=? "
             params.append(a1)
             
         if a2 is not None:
-            command += (" AND " if a1 is not None else "")+ "a2=? " + (" AND " if a3 is not None else "")
+            command += (alter_and if a1 is not None else "")+ "a2=? " + (alter_and if a3 is not None else "")
             params.append(a2)
             
         if a3 is not None:
-            command += "a3=?"
+            command += "a3=? "
             params.append(a3)
         return [command, params]
          
-    
         
     # remove row 
-    def delete(self, a1:str=None, a2:int=None, a3:int=None):
+    def delete(self, **kwargs):
         
                     
         self.con.execute(
             *ic(self.add_where_clause(self.delete_command, 
-                                        a1=a1,a2=a2,a3=a3) )
+                                        **kwargs) )
         )
         
     # clear table
@@ -89,9 +95,19 @@ CREATE TABLE IF NOT EXISTS AZ(a1 VARCHAR, a2 integer, a3 integer )
             self.delete_command
         )
         
-    # update row
-    def update(self):pass
-    
+    # update row 
+    # to=> (a1|None, a2|None, a3|None)
+    def update(self, to,**kwargs):
+        command = "UPDATE AZ"
+        command , params1 =  ic(self.add_for_params_clause(command, a1=to[0], a2=to[1], a3=to[2],
+                               alter = " SET ", alter_and = " , " ))
+        command , params2 = ic(self.add_where_clause(command, **kwargs))
+        
+        self.con.execute(
+            command,
+            params1+params2
+        )
+        return ic(self.con.fetchall()    )
     def filter(self, a1:str=None, a2:int=None, a3:int=None):
          
         self.con.execute(
