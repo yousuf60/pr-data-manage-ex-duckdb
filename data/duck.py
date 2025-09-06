@@ -71,25 +71,26 @@ CREATE TABLE IF NOT EXISTS {self.table_name} (a1 VARCHAR, a2 integer, a3 integer
         return self._add_for_params_clause(*args, **kwargs)       
                  
     def _add_for_params_clause(self, command:str,
-                        a1:str=None, a2:int=None, a3:int=None, 
-                        alter:str|None = " WHERE ", alter_and:str|None = " AND "
+                        alter:str|None = " WHERE ", alter_and:str|None = " AND ",
+                        **kwargs # your columns and the values given to =? params
                         ):
                         
         command += alter
         params = []
-        
-        if a1 is not None:
-            command += "a1=? "
-            params.append(a1)
-            
-        if a2 is not None:
-            command += (alter_and if a1 is not None else "")+ "a2=? " + (alter_and if a3 is not None else "")
-            params.append(a2)
-            
-        if a3 is not None:
-            command += "a3=? "
-            params.append(a3)
-        return [command, params]
+        cols = ic(list(kwargs.items()))
+        ln = len(cols)
+        for index in range(ln):
+            k = cols[index][0]
+            v = cols[index][1]
+            #to make sure it is not empty string  
+            if str(v): 
+                command += k + "=? "
+                params.append(v)
+            # put and if the is more than one column passed
+            if index != ln-1:
+                command += alter_and + " "
+                
+        return [ic(command), params]
          
         
     # remove row 
@@ -109,10 +110,10 @@ CREATE TABLE IF NOT EXISTS {self.table_name} (a1 VARCHAR, a2 integer, a3 integer
         )
         
     # update row 
-    # to=> (a1|None, a2|None, a3|None)
+    # to=> {"a1":..., "a2": ...}
     def _update(self, to,**kwargs):
         command = "UPDATE " + self.table_name
-        command , params1 =  ic(self._add_for_params_clause(command, a1=to[0], a2=to[1], a3=to[2],
+        command , params1 =  ic(self._add_for_params_clause(command, **to,
                                alter = " SET ", alter_and = " , " ))
         command , params2 = ic(self._add_where_clause(command, **kwargs))
         
@@ -125,11 +126,11 @@ CREATE TABLE IF NOT EXISTS {self.table_name} (a1 VARCHAR, a2 integer, a3 integer
         self._update(**kwargs)
         return self.con.fetchall()
         
-    def _filter(self, a1:str=None, a2:int=None, a3:int=None):
+    def _filter(self, **kwargs):
          
         self.con.execute(
            *ic(self._add_where_clause("SELECT * from  " + self.table_name,
-                                       a1=a1,a2=a2,a3=a3)
+                                       **kwargs)
             )
         )
     
