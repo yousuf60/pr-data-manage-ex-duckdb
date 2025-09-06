@@ -39,5 +39,11 @@ del dt, dt2
 dt = DTDuck("EX", columns = "(name varchar, id integer)")
 dt.insert_row(["kcpckpw", 198])
 dt.insert_row(["kcpckpw", 198])
+dt.insert_rows([
+    ["kcfwfd", 1928],
+    ["kwwbrw", 19458],
+    ["kcpowipw", 1948],
+    ["kcpwckpwvnvw", 191248],
+])
 ic(dt.show())
 dt.drop()
