@@ -31,3 +31,13 @@ ic(
 dt2.show(),
 dt2.filter(a2=0)
 )
+
+dt.drop()
+del dt, dt2
+
+
+dt = DTDuck("EX", columns = "(name varchar, id integer)")
+dt.insert_row(["kcpckpw", 198])
+dt.insert_row(["kcpckpw", 198])
+ic(dt.show())
+dt.drop()

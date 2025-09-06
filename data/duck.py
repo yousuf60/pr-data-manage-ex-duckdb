@@ -4,19 +4,24 @@ import duckdb
 class DTDuck:
     table_name = "AZ"
     file_path = "data/dt/ex1.db"    
-    def __init__(self, table_name = None, file_path = None ):
+    def __init__(self, table_name = None, file_path = None ,
+                 columns =  "(a1 VARCHAR, a2 integer, a3 integer )"):
         #custom table name of the DT instance
         if table_name:self.table_name = table_name
         #custom file path of the table of the DT instance
         if file_path:self.file_path = file_path
+
+        #using whatever number of columns replace it with "?" 
+        #wich is needed for store command
+        values_sandwich = "( "+",".join(tuple("?" for _ in columns.split(",") )) + ")"
+        self.store_command = f"INSERT INTO {self.table_name}  VALUES" + values_sandwich
         
-        self.store_command = f"INSERT INTO {self.table_name} VALUES(?, ?, ?)"
         self.delete_command = "DELETE FROM " + self.table_name
         
         self.con = duckdb.connect(self.file_path)
         self.con.sql(f"""
-CREATE TABLE IF NOT EXISTS {self.table_name} (a1 VARCHAR, a2 integer, a3 integer )
-        """
+CREATE TABLE IF NOT EXISTS {self.table_name}""" + columns
+        
         )
 
     #temporary example for start 
@@ -137,3 +142,9 @@ CREATE TABLE IF NOT EXISTS {self.table_name} (a1 VARCHAR, a2 integer, a3 integer
     def filter(self,  **kwargs):
         self._filter(**kwargs)
         return self.con.fetchall()
+
+    def drop(self):
+        self.con.sql(
+            "DROP TABLE " + self.table_name 
+        )
+    
