@@ -1,49 +1,65 @@
-from data import DTDuck, DTPolars, ic
+from data import PQDuck, DBDuck, DTPolars, ic
 ic.enabled = True
 
-dt = DTDuck("EX")
+# dt = DBDuck()
+dt = PQDuck()
 dt._tempex(10)
+
 #dt.show()
-dt.insert_row(["beeeeb", 0, 28956])
-ic(dt.filter(a2=0),
+@lambda _:_()
+def sqling():
+    dt.show()
+    dt.insert_row(["beeeeb", 0, 28956])
+    ic(dt.filter(a2=0),
 
-dt.filter(a2=0, a3=0),
-dt.delete(a2=0,a3=0),
-dt.filter(a2=0, a3=0),
-#dt.show()
-dt.update(a2=0, to={"a2":100}),
-dt.filter(a2=0),
-dt.filter(a2=100)
+    dt.filter(a2=0, a3=0),
+    dt.delete(a2=0,a3=0),
+    dt.filter(a2=0, a3=0),
+    #dt.show()
+    dt.update(a2=0, to={"a2":100}),
+    dt.filter(a2=0),
+    dt.filter(a2=100)
 
-)
+    )
+    dt.save()
+    
+@lambda _:_()
+def polars():
+    global dt
+    dt2 = ic(DTPolars(dt))
+    ic(
+    dt2.show(),
+    dt2.filter(a2=0)
+    )
+    ic(
+    dt2.filter(a2=100)
+    )
 
-dt2 = DTPolars(dt)
+    dt.clear()
+
+    ic(
+    dt2.show(),
+    dt2.filter(a2=0)
+    )
+
+    # dt.drop()
+    dt.save()
+    del dt
 
 
-ic(
-dt2.show(),
-dt2.filter(a2=0)
-)
-
-dt.clear()
-
-ic(
-dt2.show(),
-dt2.filter(a2=0)
-)
-
-dt.drop()
-del dt, dt2
-
-
-dt = DTDuck("EX", columns = "(name varchar, id integer)")
-dt.insert_row(["kcpckpw", 198])
-dt.insert_row(["kcpckpw", 198])
-dt.insert_rows([
-    ["kcfwfd", 1928],
-    ["kwwbrw", 19458],
-    ["kcpowipw", 1948],
-    ["kcpwckpwvnvw", 191248],
-])
-ic(dt.show())
-dt.drop()
+# dt = DBDuck("EX", columns = "(name varchar, id integer)")
+dt = PQDuck(file_path="data/dt/fl.parquet", columns = "(name varchar, id integer)")
+@lambda _:_()
+def extra():
+    dt.insert_row(["kcpckpw", 198])
+    dt.insert_row(["kcpckpw", 198])
+    dt.insert_rows([
+        ["kcfwfd", 1928],
+        ["kwwbrw", 19458],
+        ["kcpowipw", 1948],
+        ["kcpwckpwvnvw", 191248],
+    ])
+    ic(dt.show())
+    dt.clear()
+    # dt.drop()
+    # dt.save()

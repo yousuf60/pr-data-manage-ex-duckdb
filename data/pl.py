@@ -1,11 +1,11 @@
 import polars as pl
-from .duck import DTDuck, ic
+from .duck import PQDuck, ic
 
 
 # get polars DataFrame
-class DTPolars(DTDuck):
+class DTPolars(PQDuck):
     
-    def __init__(self, duck: DTDuck, store_pl=False):
+    def __init__(self, duck: PQDuck, store_pl=False):
         # copy the essential variable from duck instance
         self.store_command = ic(duck.store_command)
         self.delete_command = ic(duck.delete_command)
