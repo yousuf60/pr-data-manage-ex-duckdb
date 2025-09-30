@@ -1,16 +1,18 @@
+"""parquet version"""
+import os
 from icecream import ic
 import duckdb  
 
-class DTDuck:
-    table_name = "AZ"
-    file_path = "data/dt/ex1.db"    
+class DBDuck:
+    table_name = "TBL"
+    file_path = "data/dt/ex1.db"
     def __init__(self, table_name = None, file_path = None ,
                  columns =  "(a1 VARCHAR, a2 integer, a3 integer )"):
         #custom table name of the DT instance
         if table_name:self.table_name = table_name
         #custom file path of the table of the DT instance
         if file_path:self.file_path = file_path
-
+            
         #using whatever number of columns replace it with "?" 
         #wich is needed for store command
         values_sandwich = "( "+",".join(tuple("?" for _ in columns.split(",") )) + ")"
@@ -18,12 +20,15 @@ class DTDuck:
         
         self.delete_command = "DELETE FROM " + self.table_name
         
-        self.con = duckdb.connect(self.file_path)
+        self.connect_to_file_path()
         self.con.sql(f"""
-CREATE TABLE IF NOT EXISTS {self.table_name}""" + columns
+        CREATE TABLE IF NOT EXISTS {self.table_name} """ + columns
+)
         
-        )
-
+    def connect_to_file_path(self):
+        self.con = duckdb.connect(self.file_path)
+        ic("made file connection")
+        
     #temporary example for start 
     def _tempex(self, number_of_rows):
         import random 
@@ -66,9 +71,9 @@ CREATE TABLE IF NOT EXISTS {self.table_name}""" + columns
         
     
         self.con.executemany(self.store_command,
-            ic(
+            
                 [*row] # this way so we may use generator with yield
-            )
+            
         )    
         
 
@@ -103,8 +108,8 @@ CREATE TABLE IF NOT EXISTS {self.table_name}""" + columns
         
                     
         self.con.execute(
-            *ic(self._add_where_clause(self.delete_command, 
-                                        **kwargs) )
+            *self._add_where_clause(self.delete_command, 
+                                        **kwargs)
         )
         
     # clear table
@@ -134,17 +139,57 @@ CREATE TABLE IF NOT EXISTS {self.table_name}""" + columns
     def _filter(self, **kwargs):
          
         self.con.execute(
-           *ic(self._add_where_clause("SELECT * from  " + self.table_name,
+           *self._add_where_clause("SELECT * from  " + self.table_name,
                                        **kwargs)
-            )
+            
         )
     
     def filter(self,  **kwargs):
         self._filter(**kwargs)
         return self.con.fetchall()
 
+    def remove(self):
+        os.remove(self.file_path)
+    
     def drop(self):
         self.con.sql(
             "DROP TABLE " + self.table_name 
         )
+
     
+    def save(self, file = None):
+        if file:
+            self.copy_table_to(file)
+    
+    def copy_table_to(self, file: str):
+        self.con.sql(ic("COPY "+self.table_name+" TO "+f"'{file}'"))
+
+
+#it is named ParquetDuck but what if use it for other file types
+class PQDuck(DBDuck):
+    file_path = "data/dt/ex1.parquet"
+    
+    def __init__(self, *args, **kawrgs):
+        super().__init__(*args, **kawrgs)
+        
+        if not os.path.exists(self.file_path):
+            self.con.sql(f"""
+        COPY {self.table_name} TO '{self.file_path}' 
+            """)
+            
+        self.con.sql(f"""
+        COPY {self.table_name} FROM '{self.file_path}' """
+        )
+
+    
+    def save(self, file = None):
+        if not file:
+            file = self.file_path
+        self.copy_table_to(file)
+            
+        
+
+    # necessary to connect to our own parquet not ordinary dt file
+    def connect_to_file_path(self):
+        self.con = duckdb.connect()
+        

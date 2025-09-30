@@ -1,18 +1,18 @@
 import polars as pl
-from .duck import DTDuck, ic
+from .duck import DBDuck, ic
 
 
 # get polars DataFrame
-class DTPolars(DTDuck):
+class DTPolars(DBDuck):
     
-    def __init__(self, duck: DTDuck, store_pl=False):
-        # copy the essential variable from duck instance
+    def __init__(self, duck, store_pl=False):
+        # copy the essential settings from duck instance
         self.store_command = ic(duck.store_command)
         self.delete_command = ic(duck.delete_command)
         self.table_name = duck.table_name
         self.file_path = ic(duck.file_path)
         self.con = duck.con
-
+        self.save = duck.save
         
     def show(self):
         self._select_all()
