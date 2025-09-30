@@ -1,9 +1,9 @@
 from data import PQDuck, DBDuck, DTPolars, ic
 ic.enabled = True
 
-# dt = DBDuck()
-dt = PQDuck()
-dt._tempex(10)
+dt = DBDuck()
+# dt = PQDuck()
+dt._tempex(20)
 
 #dt.show()
 @lambda _:_()
@@ -11,7 +11,6 @@ def sqling():
     dt.show()
     dt.insert_row(["beeeeb", 0, 28956])
     ic(dt.filter(a2=0),
-
     dt.filter(a2=0, a3=0),
     dt.delete(a2=0,a3=0),
     dt.filter(a2=0, a3=0),
@@ -21,6 +20,7 @@ def sqling():
     dt.filter(a2=100)
 
     )
+    
     dt.save()
     
 @lambda _:_()
@@ -29,9 +29,7 @@ def polars():
     dt2 = ic(DTPolars(dt))
     ic(
     dt2.show(),
-    dt2.filter(a2=0)
-    )
-    ic(
+    dt2.filter(a2=0),
     dt2.filter(a2=100)
     )
 
@@ -39,11 +37,11 @@ def polars():
 
     ic(
     dt2.show(),
-    dt2.filter(a2=0)
+    dt2.filter(a2=100)
     )
 
     # dt.drop()
-    dt.save()
+    dt2.save()
     del dt
 
 
@@ -62,4 +60,4 @@ def extra():
     ic(dt.show())
     dt.clear()
     # dt.drop()
-    # dt.save()
+    dt.save()

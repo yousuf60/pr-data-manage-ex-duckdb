@@ -156,10 +156,16 @@ class DBDuck:
             "DROP TABLE " + self.table_name 
         )
 
-    # parquet testing pusrpose
-    def save(self):pass
-
     
+    def save(self, file = None):
+        if file:
+            self.copy_table_to(file)
+    
+    def copy_table_to(self, file: str):
+        self.con.sql(ic("COPY "+self.table_name+" TO "+f"'{file}'"))
+
+
+#it is named ParquetDuck but what if use it for other file types
 class PQDuck(DBDuck):
     file_path = "data/dt/ex1.parquet"
     
@@ -175,8 +181,13 @@ class PQDuck(DBDuck):
         COPY {self.table_name} FROM '{self.file_path}' """
         )
 
-    def save(self):
-        self.con.sql(ic("COPY "+self.table_name+" TO "+f"'{self.file_path}'"))
+    
+    def save(self, file = None):
+        if not file:
+            file = self.file_path
+        self.copy_table_to(file)
+            
+        
 
     # necessary to connect to our own parquet not ordinary dt file
     def connect_to_file_path(self):
